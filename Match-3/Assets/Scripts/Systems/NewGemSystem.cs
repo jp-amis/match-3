@@ -8,7 +8,6 @@ namespace Systems
     [UpdateAfter(typeof(FillSystem))]
     public class NewGemSystem : ComponentSystem
     {
-        private int total;
         private Board _board;
         public void Init(Board board)
         {
@@ -23,7 +22,6 @@ namespace Systems
                 ref TargetPositionComponent targetPositionComponent
                 ) =>
             {
-                total += 1;
                 int instancePool = _board.GetFreeGemInstancePosition();
                 gemComponent.instancePool = instancePool;
                 

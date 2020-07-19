@@ -47,6 +47,8 @@ namespace Systems
                 
                 EntityManager.RemoveComponent<SelectedComponent>(tiles[0]);
                 EntityManager.RemoveComponent<SelectedComponent>(tiles[1]);
+                
+                EntityManager.RemoveComponent<IsSelectingComponent>(this._board.Player);
 
                 this._board.HideSelect();
 

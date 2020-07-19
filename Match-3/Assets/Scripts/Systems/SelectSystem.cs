@@ -20,6 +20,16 @@ namespace Systems
 
         protected override void OnUpdate()
         {
+            if (!this._board.AllTilesFilledAndChecked())
+            {
+                return;
+            }
+            
+            if (EntityManager.HasComponent<IsDraggingComponent>(this._board.Player) && EntityManager.GetComponentData<IsDraggingComponent>(this._board.Player).verified)
+            {
+                return;
+            }
+            
             Entity? selectedTile = null;
             Entities.WithAllReadOnly<TileComponent>().ForEach(
                 (Entity entity) =>
@@ -29,8 +39,13 @@ namespace Systems
                         selectedTile = entity;
                     }
                 });
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonUp(0))
             {
+                if (EntityManager.HasComponent<InvalidMouseUpComponent>(this._board.Player))
+                {
+                    EntityManager.RemoveComponent<InvalidMouseUpComponent>(this._board.Player);
+                    return;
+                }
                 Vector3 worldPos = this._camera.ScreenToWorldPoint(Input.mousePosition);
                 int2 position = new int2((int) Mathf.Ceil(worldPos.x - 0.5f), (int) Mathf.Ceil(worldPos.y - 0.5f));
 
@@ -49,6 +64,9 @@ namespace Systems
                 
                 if (gem != null && !EntityManager.HasComponent<TargetPositionComponent>((Entity) gem) && !EntityManager.HasComponent<DestroyComponent>((Entity) gem))
                 {
+                    EntityManager.AddComponent<IsSelectingComponent>(this._board.Player);
+                    EntityManager.RemoveComponent<IsDraggingComponent>(this._board.Player);
+                    
                     EntityManager.AddComponent<SelectedComponent>(tile);
                     this._board.SetSelectPosition(EntityManager.GetComponentData<GemComponent>((Entity) gem)
                         .instancePool);

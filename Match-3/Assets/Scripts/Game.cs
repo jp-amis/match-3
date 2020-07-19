@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Systems;
+using Components;
 using Unity.Entities;
 using UnityEngine;
 
@@ -41,5 +42,7 @@ public class Game : MonoBehaviour
         world.GetOrCreateSystem<CheckSystem>().Init(board);
         world.GetOrCreateSystem<SwapBackSystem>().Init(board);
         world.GetOrCreateSystem<DestroySystem>().Init(board);
+        world.GetOrCreateSystem<DragSystem>().Init(board, this.mainCamera);
+        world.GetOrCreateSystem<ZOrderSystem>().Init(board);
     }
 }
