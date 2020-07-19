@@ -31,12 +31,14 @@ namespace Systems
                 int2 position2 = EntityManager.GetComponentData<PositionComponent>(gem2).position;
 
                 EntityManager.AddComponent<CheckComponent>(gem1);
-                EntityManager.SetComponentData(gem1, new CheckComponent {originPosition = position1});
+                EntityManager.AddComponent<SwappingComponent>(gem1);
+                EntityManager.SetComponentData(gem1, new SwappingComponent {originPosition = position1, swapPair = gem2});
                 EntityManager.AddComponent<TargetPositionComponent>(gem1);
                 EntityManager.SetComponentData(gem1, new TargetPositionComponent {position = position2});
                 
                 EntityManager.AddComponent<CheckComponent>(gem2);
-                EntityManager.SetComponentData(gem2, new CheckComponent {originPosition = position2});
+                EntityManager.AddComponent<SwappingComponent>(gem2);
+                EntityManager.SetComponentData(gem2, new SwappingComponent {originPosition = position2, swapPair = gem1});
                 EntityManager.AddComponent<TargetPositionComponent>(gem2);
                 EntityManager.SetComponentData(gem2, new TargetPositionComponent {position = position1});
 

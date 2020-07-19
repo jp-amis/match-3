@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using Components;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -18,6 +19,11 @@ public class Board
     };
     
     private int _width;
+
+    public int Width => _width;
+
+    public int Height => _height;
+
     private int _height;
     private EntityManager _entityManager;
     private GameObject _tilePrefab;
@@ -25,7 +31,8 @@ public class Board
     private GameObject _selected;
 
     private Dictionary<int2, Entity> _tiles = new Dictionary<int2, Entity>();
-    private List<GameObject> gems = new List<GameObject>();
+    private List<GameObject> _gems = new List<GameObject>();
+    private Dictionary<int2, List<int>> _firstGemsDictionary = new Dictionary<int2, List<int>>();
 
     public Board(int width, int height, EntityManager entityManager, GameObject tilePrefab, Sprite[] tileSprites, GameObject selected)
     {
@@ -35,9 +42,59 @@ public class Board
         this._tilePrefab = tilePrefab;
         this._tileSprites = tileSprites;
         this._selected = selected;
-        
+
+        this.FillFirstGems();
         this.InitGemPool();
         this.InitTiles();
+    }
+
+    private void FillFirstGems()
+    {
+        List<int> possibleTypes = new List<int>();
+        for (int i = 0; i < this._tileSprites.Length; i++)
+        {
+            possibleTypes.Add(i);
+        }
+        
+        Dictionary<int2, int> gemsDictionary = new Dictionary<int2, int>();
+        for (int x = 0; x < _width; x += 1)
+        {
+            for (int y = 0; y < _height; y += 1)
+            {
+                int2 position = new int2(x, y);
+                int2 positionLeft = this.GetPositionInDirection(position, Direction.LEFT);
+                int2 positionDown = this.GetPositionInDirection(position, Direction.DOWN);
+                
+                
+                List<int> currPossibleTypes = new List<int>();
+                currPossibleTypes.AddRange(possibleTypes);
+
+                if (gemsDictionary.ContainsKey(positionLeft))
+                {
+                    currPossibleTypes.Remove(gemsDictionary[positionLeft]);
+                }
+                
+                if (gemsDictionary.ContainsKey(positionDown))
+                {
+                    currPossibleTypes.Remove(gemsDictionary[positionDown]);
+                }
+                
+                gemsDictionary[position] = currPossibleTypes[Random.Range(0, currPossibleTypes.Count)];
+            }
+        }
+
+        foreach (KeyValuePair<int2,int> gemKV in gemsDictionary)
+        {
+            int2 key = gemKV.Key;
+            key.y = this._height - 1;
+
+            if (!this._firstGemsDictionary.ContainsKey(key))
+            {
+                this._firstGemsDictionary[key] = new List<int>();
+            }
+            
+            this._firstGemsDictionary[key].Add(gemKV.Value);
+        }
     }
 
     private void InitTiles()
@@ -69,8 +126,9 @@ public class Board
             for (int y = 0; y < _height; y += 1)
             {
                 GameObject gem = GameObject.Instantiate(this._tilePrefab);
+                gem.name = "pool_" + this._gems.Count;
                 gem.SetActive(false);
-                this.gems.Add(gem);
+                this._gems.Add(gem);
             }
         }
     }
@@ -78,25 +136,41 @@ public class Board
     public int GetFreeGemInstancePosition()
     {
         int i = 0;
-        foreach (GameObject gem in this.gems)
+        foreach (GameObject gem in this._gems)
         {
             if (!gem.activeInHierarchy)
             {
                 gem.transform.position = new Vector3(1000, 1000, 0);
                 gem.SetActive(true);
-                return i;
+                break;
             }
             i += 1;
         }
 
-        return 0;
+        return i;
+    }
+
+    public void FreeGem(int pool)
+    {
+        this._gems[pool].SetActive(false);
     }
 
     // Gem
-    public int RandomizeColor(int pool)
+    public int RandomizeColor(int pool, int2 position)
     {
-        int type = Random.Range(0, this._tileSprites.Length);
-        SpriteRenderer spriteRenderer = this.gems[pool].GetComponent<SpriteRenderer>();
+        int type = -1;
+        if (this._firstGemsDictionary.ContainsKey(position) && this._firstGemsDictionary[position].Count > 0)
+        {
+            type = this._firstGemsDictionary[position][0];
+            this._firstGemsDictionary[position].RemoveAt(0);
+        }
+        else
+        {
+            type = Random.Range(0, this._tileSprites.Length);
+        }
+        
+        
+        SpriteRenderer spriteRenderer = this._gems[pool].GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = this._tileSprites[type];
 
         return type;
@@ -104,9 +178,15 @@ public class Board
     
     public void SetGemPosition(int pool, float2 position)
     {
-        GameObject gem = this.gems[pool];
+        GameObject gem = this._gems[pool];
         
         gem.transform.position = new Vector3(position.x, position.y, 0.0f);
+    }
+
+    public void SetGemScale(int pool, float2 scale)
+    {
+        GameObject gem = this._gems[pool];
+        gem.transform.localScale = new Vector3(scale.x, scale.y, 1.0f);
     }
 
     public void HideSelect()
@@ -117,7 +197,7 @@ public class Board
     public void SetSelectPosition(int pool)
     {
         this._selected.SetActive(true);
-        this._selected.transform.position = this.gems[pool].transform.position;
+        this._selected.transform.position = new Vector3(this._gems[pool].transform.position.x, this._gems[pool].transform.position.y, -1);
     }
 
     // Helpers
@@ -188,7 +268,12 @@ public class Board
 
     public Entity GetTileAtPosition(int2 position)
     {
-        return _tiles[position];
+        return this._tiles[position];
+    }
+
+    public bool HasTileAtPosition(int2 position)
+    {
+        return this._tiles.ContainsKey(position);
     }
 
     public bool IsPositionAdjacent(int2 pos1, int2 pos2)

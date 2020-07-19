@@ -21,7 +21,7 @@ namespace Systems
                 typeof(GemComponent),
                 typeof(TargetPositionComponent),
                 typeof(NewGemComponent),
-                typeof(TypeComponent)
+                typeof(CheckComponent)
             );
         }
 
@@ -36,12 +36,13 @@ namespace Systems
                 Entity? entityOnTop = _board.GetTileInDirection(positionComponent.position, Board.Direction.UP);
                 if (entityOnTop == null)
                 {
-                    EntityManager.RemoveComponent<EmptyTileComponent>(entity);
                     // generate
                     Entity gem = EntityManager.CreateEntity(this.gemArchetype);
                     EntityManager.SetComponentData(gem, new TargetPositionComponent {position = positionComponent.position});
 
                     tileComponent.gem = gem;
+                    
+                    EntityManager.RemoveComponent<EmptyTileComponent>(entity);
                 }
                 else if (!EntityManager.HasComponent<EmptyTileComponent>((Entity) entityOnTop))
                 {

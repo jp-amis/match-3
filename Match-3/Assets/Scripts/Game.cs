@@ -39,5 +39,7 @@ public class Game : MonoBehaviour
         world.GetOrCreateSystem<SelectSystem>().Init(board, this.mainCamera);
         world.GetOrCreateSystem<SwapSystem>().Init(board);
         world.GetOrCreateSystem<CheckSystem>().Init(board);
+        world.GetOrCreateSystem<SwapBackSystem>().Init(board);
+        world.GetOrCreateSystem<DestroySystem>().Init(board);
     }
 }

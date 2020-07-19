@@ -8,6 +8,7 @@ namespace Systems
     [UpdateAfter(typeof(FillSystem))]
     public class NewGemSystem : ComponentSystem
     {
+        private int total;
         private Board _board;
         public void Init(Board board)
         {
@@ -16,25 +17,32 @@ namespace Systems
 
         protected override void OnUpdate()
         {
-            Entities.WithAllReadOnly<GemComponent, NewGemComponent, TargetPositionComponent>().ForEach((
+            Entities.WithAll<GemComponent, NewGemComponent, TargetPositionComponent>().ForEach((
                 Entity entity,
                 ref GemComponent gemComponent,
                 ref TargetPositionComponent targetPositionComponent
                 ) =>
             {
+                total += 1;
                 int instancePool = _board.GetFreeGemInstancePosition();
-                EntityManager.SetComponentData(entity, new GemComponent {instancePool = instancePool});
+                gemComponent.instancePool = instancePool;
                 
-                int type = this._board.RandomizeColor(instancePool);
+                EntityManager.AddComponent(entity, typeof(TypeComponent));
+                int type = this._board.RandomizeColor(instancePool, targetPositionComponent.position);
                 EntityManager.SetComponentData(entity, new TypeComponent {type = type});
-                
+
                 EntityManager.AddComponent(entity, typeof(PositionComponent));
                 EntityManager.AddComponent(entity, typeof(WorldPositionComponent));
                 int2 initialPosition = this._board.GetPositionInDirection(targetPositionComponent.position, Board.Direction.UP);
                 EntityManager.SetComponentData(entity, new PositionComponent {position = initialPosition});
                 EntityManager.SetComponentData(entity, new WorldPositionComponent {position = initialPosition});
 
+                EntityManager.AddComponent(entity, typeof(WorldScaleComponent));
+                float2 initialScale = new float2(1.0f, 1.0f);
+                EntityManager.SetComponentData(entity, new WorldScaleComponent {scale = initialScale});
+                
                 this._board.SetGemPosition(gemComponent.instancePool, initialPosition);
+                this._board.SetGemScale(gemComponent.instancePool, initialScale);
                 
                 EntityManager.RemoveComponent<NewGemComponent>(entity);
             });

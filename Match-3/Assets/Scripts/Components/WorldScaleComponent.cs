@@ -3,7 +3,8 @@ using Unity.Mathematics;
 
 namespace Components
 {
-    public struct CheckComponent : IComponentData
+    public struct WorldScaleComponent : IComponentData
     {
+        public float2 scale;
     }
 }

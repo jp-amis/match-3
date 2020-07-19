@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardWidth: 8
   boardHeight: 8
-  gemVelocity: 4
+  gemVelocity: 6
   tilePrefab: {fileID: 3330513747065196060, guid: 7a770a3fdaa49495bb613ed09c0bf9a6,
     type: 3}
   selected: {fileID: 945559151}

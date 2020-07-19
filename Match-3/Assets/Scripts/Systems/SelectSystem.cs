@@ -38,11 +38,16 @@ namespace Systems
                 {
                     return;
                 }
+
+                if (!this._board.HasTileAtPosition(position))
+                {
+                    return;
+                }
                 
                 Entity tile = this._board.GetTileAtPosition(position);
                 Entity? gem = EntityManager.GetComponentData<TileComponent>(tile).gem;
                 
-                if (gem != null && !EntityManager.HasComponent<TargetPositionComponent>((Entity) gem))
+                if (gem != null && !EntityManager.HasComponent<TargetPositionComponent>((Entity) gem) && !EntityManager.HasComponent<DestroyComponent>((Entity) gem))
                 {
                     EntityManager.AddComponent<SelectedComponent>(tile);
                     this._board.SetSelectPosition(EntityManager.GetComponentData<GemComponent>((Entity) gem)
