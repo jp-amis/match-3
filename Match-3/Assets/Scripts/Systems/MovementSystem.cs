@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Systems
 {
-    [UpdateAfter(typeof(NewGemPositioningSystem))]
+    [UpdateAfter(typeof(NewGemSystem))]
     public class MovementSystem : ComponentSystem
     {
         private float _velocity;

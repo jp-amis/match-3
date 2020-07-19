@@ -20,7 +20,8 @@ namespace Systems
             this.gemArchetype = EntityManager.CreateArchetype(
                 typeof(GemComponent),
                 typeof(TargetPositionComponent),
-                typeof(NewGemComponent)
+                typeof(NewGemComponent),
+                typeof(TypeComponent)
             );
         }
 
@@ -38,7 +39,6 @@ namespace Systems
                     EntityManager.RemoveComponent<EmptyTileComponent>(entity);
                     // generate
                     Entity gem = EntityManager.CreateEntity(this.gemArchetype);
-                    EntityManager.SetComponentData(gem, new GemComponent {instancePool = _board.GetFreeGemInstancePosition()});
                     EntityManager.SetComponentData(gem, new TargetPositionComponent {position = positionComponent.position});
 
                     tileComponent.gem = gem;

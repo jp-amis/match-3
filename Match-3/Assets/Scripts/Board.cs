@@ -83,8 +83,6 @@ public class Board
             if (!gem.activeInHierarchy)
             {
                 gem.transform.position = new Vector3(1000, 1000, 0);
-                SpriteRenderer spriteRenderer = gem.GetComponent<SpriteRenderer>();
-                spriteRenderer.sprite = this._tileSprites[Random.Range(0, this._tileSprites.Length)];
                 gem.SetActive(true);
                 return i;
             }
@@ -93,8 +91,17 @@ public class Board
 
         return 0;
     }
-    
+
     // Gem
+    public int RandomizeColor(int pool)
+    {
+        int type = Random.Range(0, this._tileSprites.Length);
+        SpriteRenderer spriteRenderer = this.gems[pool].GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = this._tileSprites[type];
+
+        return type;
+    }
+    
     public void SetGemPosition(int pool, float2 position)
     {
         GameObject gem = this.gems[pool];
@@ -105,13 +112,14 @@ public class Board
     public void HideSelect()
     {
         this._selected.SetActive(false);
-    }
+    } 
+    
     public void SetSelectPosition(int pool)
     {
         this._selected.SetActive(true);
         this._selected.transform.position = this.gems[pool].transform.position;
     }
-    
+
     // Helpers
     public int2 GetPositionInDirection(int2 position, Direction direction)
     {
@@ -135,6 +143,7 @@ public class Board
 
         return positionInDirection;
     }
+    
     public Entity? GetTileInDirection(int2 position, Direction direction)
     {
         int2 positionInDirection = this.GetPositionInDirection(position, direction);
@@ -151,7 +160,7 @@ public class Board
 
         return this._tiles[positionInDirection];
     }
-
+    
     public Direction GetDirectionFrom(int2 position, int2 targetPosition)
     {
         if (position.y > targetPosition.y)
@@ -201,6 +210,19 @@ public class Board
         if (diff.x > 1 || diff.y > 1)
         {
             return false;
+        }
+
+        return true;
+    }
+
+    public bool AllTilesFilled()
+    {
+        foreach (KeyValuePair<int2,Entity> tile in this._tiles)
+        {
+            if (_entityManager.HasComponent<EmptyTileComponent>(tile.Value))
+            {
+                return false;
+            }
         }
 
         return true;

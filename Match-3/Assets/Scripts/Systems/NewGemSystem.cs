@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Systems
 {
     [UpdateAfter(typeof(FillSystem))]
-    public class NewGemPositioningSystem : ComponentSystem
+    public class NewGemSystem : ComponentSystem
     {
         private Board _board;
         public void Init(Board board)
@@ -22,6 +22,12 @@ namespace Systems
                 ref TargetPositionComponent targetPositionComponent
                 ) =>
             {
+                int instancePool = _board.GetFreeGemInstancePosition();
+                EntityManager.SetComponentData(entity, new GemComponent {instancePool = instancePool});
+                
+                int type = this._board.RandomizeColor(instancePool);
+                EntityManager.SetComponentData(entity, new TypeComponent {type = type});
+                
                 EntityManager.AddComponent(entity, typeof(PositionComponent));
                 EntityManager.AddComponent(entity, typeof(WorldPositionComponent));
                 int2 initialPosition = this._board.GetPositionInDirection(targetPositionComponent.position, Board.Direction.UP);

@@ -1,6 +1,8 @@
+using Unity.Entities;
+
 namespace Components
 {
-    public struct TypeComponent
+    public struct TypeComponent : IComponentData
     {
         public int type;
     }

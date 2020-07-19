@@ -34,7 +34,7 @@ public class Game : MonoBehaviour
         Board board = new Board(this.boardWidth, this.boardHeight, entityManager, this.tilePrefab, this.tileSprites, this.selected);
         
         world.GetOrCreateSystem<FillSystem>().Init(board);
-        world.GetOrCreateSystem<NewGemPositioningSystem>().Init(board);
+        world.GetOrCreateSystem<NewGemSystem>().Init(board);
         world.GetOrCreateSystem<MovementSystem>().Init(board, this.gemVelocity);
         world.GetOrCreateSystem<SelectSystem>().Init(board, this.mainCamera);
         world.GetOrCreateSystem<SwapSystem>().Init(board);
